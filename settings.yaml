@@ -1,0 +1,76 @@
+### GraphRAG Settings for IT Troubleshooting Knowledge Graph
+### Uses OpenRouter as the backend (OpenAI-compatible API via LiteLLM)
+
+completion_models:
+  default_completion_model:
+    type: litellm
+    model_provider: openai
+    api_key: ${OPENROUTER_API_KEY}
+    api_base: https://openrouter.ai/api/v1
+    model: anthropic/claude-haiku-4-5
+    call_args:
+      temperature: 0.0
+      max_tokens: 4000
+
+embedding_models:
+  default_embedding_model:
+    type: litellm
+    model_provider: openai
+    api_key: ${OPENROUTER_API_KEY}
+    api_base: https://openrouter.ai/api/v1
+    model: text-embedding-3-small
+    call_args:
+      encoding_format: float
+
+input:
+  type: text
+  file_pattern: ".*\\.txt$$"
+  encoding: utf-8
+
+input_storage:
+  type: file
+  base_dir: input
+
+output_storage:
+  type: file
+  base_dir: output
+
+chunks:
+  size: 1200
+  overlap: 100
+
+extract_graph:
+  completion_model_id: default_completion_model
+  max_gleanings: 1
+  entity_types:
+    - problem
+    - solution
+    - component
+    - error
+    - system
+    - technology
+    - procedure
+
+community_reports:
+  completion_model_id: default_completion_model
+  max_length: 2000
+  max_input_length: 16000
+
+summarize_descriptions:
+  completion_model_id: default_completion_model
+  max_length: 500
+
+embed_text:
+  embedding_model_id: default_embedding_model
+
+vector_store:
+  type: lancedb
+  db_uri: output/lancedb
+  vector_size: 1536
+
+cache:
+  type: none
+
+reporting:
+  type: file
+  base_dir: logs

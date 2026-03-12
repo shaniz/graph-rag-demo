@@ -1,0 +1,57 @@
+[
+  {
+    "id": "tree-root",
+    "title": "Web Application Performance Troubleshooting (Root)",
+    "content": "A web application experiencing performance problems can fail at three top-level layers: Frontend (browser-side rendering and scripting), Backend (server-side processing and APIs), or Infrastructure (compute, network, and storage). Start diagnosis by measuring end-to-end response time. Use browser DevTools Network tab to split time between Time To First Byte (TTFB) and content download. If TTFB is high (>500ms), the problem is Backend or Infrastructure. If TTFB is low but page load is slow, the problem is Frontend. This root node branches into three child investigations: frontend-issues, backend-issues, and infrastructure-issues."
+  },
+  {
+    "id": "tree-frontend",
+    "title": "Frontend Performance Issues (Child of Root)",
+    "content": "Frontend performance problems originate in the browser. Parent node: Web Application Performance Troubleshooting. Child nodes: frontend-js (JavaScript execution) and frontend-assets (network asset delivery). Measure with Lighthouse or WebPageTest. Key metrics: First Contentful Paint (FCP), Largest Contentful Paint (LCP), Total Blocking Time (TBT). A high TBT points to JavaScript blocking the main thread — see frontend-js. A high LCP with low TBT points to slow asset delivery — see frontend-assets. Check the browser console for JavaScript errors before proceeding."
+  },
+  {
+    "id": "tree-frontend-js",
+    "title": "JavaScript Performance Problems (Child of Frontend)",
+    "content": "JavaScript execution blocks the browser main thread and freezes the UI. Parent node: Frontend Performance Issues. No child nodes — this is a leaf. Diagnose with Chrome DevTools Performance tab: record a session and look for long tasks (>50ms). Common causes: (1) Unoptimized loops over large arrays — use pagination or Web Workers for CPU-heavy computation. (2) Excessive re-renders in React/Vue — use React.memo, shouldComponentUpdate, or computed properties. (3) Memory leaks from forgotten event listeners — use the Memory tab to take heap snapshots and compare growth. (4) Large bundle size — run 'npx webpack-bundle-analyzer' to identify oversized dependencies. Fix: code-split with dynamic import(), tree-shake unused exports, defer non-critical scripts with async/defer attributes."
+  },
+  {
+    "id": "tree-frontend-assets",
+    "title": "Asset Delivery Slowness (Child of Frontend)",
+    "content": "Slow delivery of images, CSS, and JavaScript files increases page load time. Parent node: Frontend Performance Issues. No child nodes — this is a leaf. Diagnose by checking the Network tab waterfall: look for large files, missing cache headers, and sequential loading of parallel-safe resources. Common causes: (1) Uncompressed assets — enable gzip or Brotli compression in Nginx (gzip on; gzip_types text/css application/javascript) or Apache (mod_deflate). (2) No CDN — serve static assets from a CDN like CloudFront or Cloudflare to reduce latency for distant users. (3) No HTTP/2 — HTTP/1.1 limits parallel connections; enable HTTP/2 on your web server. (4) Render-blocking CSS — move critical CSS inline and defer non-critical stylesheets. (5) Large images — compress with WebP format, set proper Cache-Control headers (max-age=31536000, immutable for versioned assets)."
+  },
+  {
+    "id": "tree-backend",
+    "title": "Backend Performance Issues (Child of Root)",
+    "content": "Backend performance problems occur in the application server. Parent node: Web Application Performance Troubleshooting. Child nodes: backend-api (slow API endpoints) and backend-db (database bottlenecks). High TTFB (>200ms) points here. Start by profiling individual API endpoints: log request duration for each route. Use Application Performance Monitoring (APM) tools like Datadog, New Relic, or open-source Jaeger for distributed tracing. If most time is spent in database calls, proceed to backend-db. If time is in computation or external API calls, proceed to backend-api."
+  },
+  {
+    "id": "tree-backend-api",
+    "title": "Slow API Endpoints (Child of Backend)",
+    "content": "Slow API endpoints degrade user experience and can cascade into timeouts. Parent node: Backend Performance Issues. No child nodes — this is a leaf. Diagnose with distributed tracing: instrument routes with OpenTelemetry spans to identify which functions are slow. Common causes: (1) Synchronous blocking calls in async code — never call blocking I/O (file reads, HTTP requests) without await in Node.js or async/await in Python. (2) N+1 query problem — a loop that fires one database query per item; fix by batching queries or using DataLoader. (3) Slow external API dependencies — implement circuit breakers with libraries like resilience4j (Java) or pybreaker (Python); add timeouts to all outbound HTTP calls. (4) No response caching — cache expensive computations in Redis with a TTL appropriate to data freshness requirements. (5) Unindexed full-text search — replace LIKE queries with dedicated search engines like Elasticsearch or Meilisearch."
+  },
+  {
+    "id": "tree-backend-db",
+    "title": "Database Bottlenecks (Child of Backend)",
+    "content": "Database slowness is the most common backend performance problem. Parent node: Backend Performance Issues. No child nodes — this is a leaf. Diagnose: enable slow query logging in PostgreSQL (log_min_duration_statement = 500) or MySQL (slow_query_log = ON, long_query_time = 0.5). Review execution plans with EXPLAIN ANALYZE in PostgreSQL or EXPLAIN in MySQL. Common causes: (1) Missing indexes — add indexes on columns used in WHERE, JOIN ON, and ORDER BY clauses; use 'pg_stat_user_indexes' to find unused indexes to remove. (2) Lock contention — long-running transactions block others; use 'SELECT * FROM pg_locks JOIN pg_stat_activity' to identify blocking sessions; kill with pg_terminate_backend(pid). (3) Unbounded result sets — add LIMIT clauses; paginate large result sets with cursor-based pagination. (4) Cartesian joins — always verify JOIN conditions; use EXPLAIN to check for seq scans on large tables. (5) Vacuum lag in PostgreSQL — dead tuples accumulate if autovacuum can't keep up; run VACUUM ANALYZE manually or tune autovacuum_vacuum_scale_factor."
+  },
+  {
+    "id": "tree-infrastructure",
+    "title": "Infrastructure Performance Issues (Child of Root)",
+    "content": "Infrastructure bottlenecks affect all applications running on the host. Parent node: Web Application Performance Troubleshooting. Child nodes: infra-cpu (CPU saturation), infra-network (network latency and throughput), and infra-storage (disk I/O). Check system-level metrics first: CPU utilization with 'top' or 'htop', network with 'iftop' or 'nethogs', disk with 'iostat -x 1'. If CPU is above 80% sustained, go to infra-cpu. If network shows high latency or packet loss, go to infra-network. If disk await is above 20ms, go to infra-storage."
+  },
+  {
+    "id": "tree-infra-cpu",
+    "title": "CPU Saturation (Child of Infrastructure)",
+    "content": "CPU saturation causes request queuing and increased latency across all services. Parent node: Infrastructure Performance Issues. No child nodes — this is a leaf. Diagnose: 'mpstat -P ALL 1' shows per-core utilization — uneven distribution indicates single-threaded bottleneck. 'perf top' shows hot kernel and userspace functions. 'pidstat 1' shows per-process CPU over time. Common causes: (1) Single-threaded application — scale horizontally with multiple processes behind a load balancer; use Node.js cluster module or Gunicorn workers for Python. (2) GC pressure in JVM — use G1GC with -XX:+UseG1GC; monitor with 'jstat -gcutil <pid> 1000'; tune heap size. (3) Busy-wait polling loops — replace with event-driven I/O using epoll/kqueue. (4) Crypto operations on hot path — offload TLS termination to a reverse proxy (Nginx, HAProxy) or hardware accelerator. (5) Runaway process — use cgroups (systemd CPUQuota=50%) to cap CPU consumption per service."
+  },
+  {
+    "id": "tree-infra-network",
+    "title": "Network Latency and Throughput Issues (Child of Infrastructure)",
+    "content": "Network problems cause slow connections and request timeouts. Parent node: Infrastructure Performance Issues. No child nodes — this is a leaf. Diagnose: 'ping -c 100 target' measures round-trip latency and packet loss; any loss above 0.1% is significant. 'mtr --report target' identifies which hop introduces latency. 'iperf3 -c server' measures TCP throughput. 'ss -s' shows socket statistics and connection counts. Common causes: (1) Bandwidth saturation — use 'iftop' to identify which process or IP consumes bandwidth; implement traffic shaping with 'tc qdisc'. (2) High connection count — tune kernel parameters: net.core.somaxconn, net.ipv4.tcp_max_syn_backlog, net.ipv4.ip_local_port_range. (3) DNS resolution latency — cache DNS locally with systemd-resolved or dnsmasq; check TTLs. (4) MTU mismatch causing fragmentation — test with 'ping -M do -s 1472 gateway'; set MTU appropriately on interface. (5) Network card interrupt coalescing — tune with 'ethtool -C eth0 rx-usecs 50' to balance latency vs throughput."
+  },
+  {
+    "id": "tree-infra-storage",
+    "title": "Disk I/O Bottlenecks (Child of Infrastructure)",
+    "content": "Disk I/O bottlenecks cause high latency for any workload that reads or writes files. Parent node: Infrastructure Performance Issues. No child nodes — this is a leaf. Diagnose: 'iostat -x 1' — watch %util (saturation above 80%), await (average request time; >10ms for SSD or >50ms for HDD is concerning), and r/s+w/s (IOPS). 'iotop -o' shows which processes are doing I/O. 'blktrace /dev/sda' gives low-level I/O event tracing. Common causes: (1) Insufficient IOPS — upgrade from HDD to NVMe SSD; provision IOPS in cloud (AWS EBS gp3 allows 16,000 IOPS). (2) Write amplification — batch small writes; use write-back caching with appropriate durability guarantees. (3) Filesystem choice — ext4 with relatime mount option reduces metadata writes; XFS performs better for large files and parallel I/O. (4) Log files filling disk — implement log rotation with logrotate; monitor disk usage with 'df -h' and alert at 85%. (5) Swap thrashing — check 'vmstat 1' for high 'si'/'so' (swap in/out); add RAM or reduce memory footprint to eliminate swapping."
+  }
+]

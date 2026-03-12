@@ -1,0 +1,52 @@
+[
+  {
+    "id": "doc001",
+    "title": "Network Connectivity Troubleshooting",
+    "content": "When a workstation cannot connect to the network, start by checking the physical connection. Ensure the Ethernet cable is properly seated in both the NIC and the switch port. Check the link lights on both ends. If using Wi-Fi, verify the adapter is enabled and the correct SSID is selected. Run 'ipconfig /all' on Windows or 'ip addr' on Linux to verify IP configuration. If the IP is 169.254.x.x (APIPA), the machine failed to get a DHCP lease. Try 'ipconfig /release' followed by 'ipconfig /renew'. Check the DHCP server logs for errors. Ping the default gateway to test Layer 3 connectivity. If the gateway responds but internet does not work, check DNS settings with 'nslookup google.com'. Common causes include misconfigured VLAN, spanning tree issues, and incorrect subnet mask."
+  },
+  {
+    "id": "doc002",
+    "title": "Windows Blue Screen of Death (BSOD) Analysis",
+    "content": "Blue Screen of Death errors indicate a critical system failure. The stop code displayed identifies the root cause. MEMORY_MANAGEMENT (0x0000001A) suggests faulty RAM - run Windows Memory Diagnostic or MemTest86. DRIVER_IRQL_NOT_LESS_OR_EQUAL (0x000000D1) points to a problematic driver. Use Driver Verifier to identify the culprit. SYSTEM_SERVICE_EXCEPTION (0x0000003B) is often caused by corrupted system files - run 'sfc /scannow'. Collect minidump files from C:\\Windows\\Minidump and analyze with WinDbg. The !analyze -v command in WinDbg provides detailed crash information. Check Event Viewer System logs for errors preceding the crash. Ensure all drivers are up to date, especially graphics and network adapters."
+  },
+  {
+    "id": "doc003",
+    "title": "Email Delivery Failures and SMTP Troubleshooting",
+    "content": "Email delivery failures can occur at multiple points in the mail chain. Start by checking the mail queue on the sending server using 'mailq' (Postfix) or 'Get-Message' in Exchange. NDR (Non-Delivery Reports) contain error codes: 5.1.1 means the recipient address does not exist, 5.7.1 indicates the sender is not authorized. Verify MX records with 'nslookup -type=MX domain.com'. Test SMTP connectivity with 'telnet mail.server.com 25'. Check SPF, DKIM, and DMARC records to prevent spam filtering. Review mail server logs - Postfix logs to /var/log/mail.log. For Exchange, use the Message Trace tool in the admin center. Blacklist issues can be checked at MXToolbox. TLS handshake failures require certificate verification."
+  },
+  {
+    "id": "doc004",
+    "title": "Active Directory Authentication Problems",
+    "content": "Active Directory authentication failures prevent users from logging into domain resources. Event ID 4625 in Security logs indicates failed logon attempts. Common causes: incorrect password, account lockout, time skew exceeding 5 minutes. Check account status with 'Get-ADUser -Identity username -Properties LockedOut, BadLogonCount'. Unlock with 'Unlock-ADAccount'. Kerberos errors (KDC_ERR_C_PRINCIPAL_UNKNOWN) indicate the account doesn't exist or is disabled. Verify DNS is pointing to Domain Controllers. Test domain connectivity with 'nltest /sc_verify:domain.com'. LDAP binding issues: check that port 389 and 636 (LDAPS) are accessible. For group policy failures, run 'gpresult /R' to see applied policies. Replication issues between DCs can be diagnosed with 'repadmin /replsummary'."
+  },
+  {
+    "id": "doc005",
+    "title": "High CPU Usage Investigation on Linux Servers",
+    "content": "High CPU usage on Linux servers requires systematic investigation. Use 'top' or 'htop' to identify processes consuming CPU. 'uptime' shows load averages - a load average greater than the number of CPU cores indicates saturation. Identify specific threads with 'top -H -p <pid>'. Use 'strace -p <pid>' to see system calls made by the process. For Java applications, use 'jstack <pid>' for thread dumps. 'perf top' provides kernel-level profiling. Check for runaway cron jobs in /var/log/cron. Zombie processes appear with Z state in 'ps aux'. High system CPU (sy%) indicates kernel work - check interrupt counts with 'cat /proc/interrupts'. For web servers, check if a particular URL pattern is causing load with access log analysis. Set CPU limits with cgroups to contain runaway processes."
+  },
+  {
+    "id": "doc006",
+    "title": "Database Connection Pool Exhaustion",
+    "content": "Database connection pool exhaustion causes application timeouts and errors. Symptoms include 'Connection timeout' or 'Unable to acquire connection from pool' errors. Check current connections: in PostgreSQL use 'SELECT count(*) FROM pg_stat_activity'. In MySQL use 'SHOW PROCESSLIST'. Compare against max_connections setting. Long-running queries block connection release - identify with 'SELECT query, now() - pg_stat_activity.query_start AS duration FROM pg_stat_activity WHERE state != idle'. Kill blocking queries with 'SELECT pg_terminate_backend(pid)'. Increase pool size in application configuration but ensure database max_connections allows it. Implement connection timeouts and checkout timeouts. Consider PgBouncer or ProxySQL for connection pooling. Monitor with pg_stat_activity and set up alerts when connections exceed 80% of max."
+  },
+  {
+    "id": "doc007",
+    "title": "SSL Certificate Errors and HTTPS Issues",
+    "content": "SSL certificate errors disrupt secure web connections. ERR_CERT_AUTHORITY_INVALID means the certificate authority is not trusted - install the CA certificate chain. ERR_CERT_DATE_INVALID indicates an expired certificate - check with 'openssl s_client -connect host:443 | openssl x509 -noout -dates'. CN_INVALID means the certificate hostname doesn't match. For Let's Encrypt, renew with 'certbot renew'. Check certificate chain completeness - missing intermediate certificates cause chain validation failures. Test with 'openssl s_client -connect host:443 -showcerts'. Verify certificate installation on the web server (Apache: SSLCertificateFile directive; Nginx: ssl_certificate directive). Mixed content warnings occur when HTTPS pages load HTTP resources. HSTS (HTTP Strict Transport Security) can prevent access if incorrectly configured."
+  },
+  {
+    "id": "doc008",
+    "title": "Disk I/O Performance Issues",
+    "content": "Poor disk I/O performance affects application response times. Use 'iostat -x 1' to monitor disk utilization - '%util' above 80% indicates saturation. 'iotop' shows per-process I/O consumption. High 'await' values indicate slow storage response. For HDDs, check for fragmentation and head seek times. For SSDs, monitor wear leveling with 'smartctl -a /dev/sda'. RAID degradation significantly impacts performance - check 'cat /proc/mdstat' for software RAID status. Identify files being heavily accessed with 'inotifywait -m -r /path'. Database I/O can be reduced with proper indexing. PostgreSQL's pg_statio_user_tables shows buffer hits vs disk reads. Use 'fio' for storage benchmarking. Consider LVM striping for better throughput. Check for filesystem journal issues with 'dmesg | grep -i error'."
+  },
+  {
+    "id": "doc009",
+    "title": "Kubernetes Pod CrashLoopBackOff Resolution",
+    "content": "CrashLoopBackOff in Kubernetes indicates a pod repeatedly failing to start. Investigate with 'kubectl logs <pod-name> --previous' to see logs from the crashed container. 'kubectl describe pod <pod-name>' shows events and error messages. OOMKilled status means the container exceeded memory limits - increase limits in the deployment spec. Exit code 1 is a general application error - check application logs. Exit code 137 indicates SIGKILL (usually OOM). Exit code 139 is a segmentation fault. Check liveness probe configuration - overly aggressive probes kill healthy containers. Verify image pull credentials with 'kubectl get events'. ConfigMap or Secret mounting errors prevent startup - verify names and keys. Init container failures block main container start. Resource limits too low prevent scheduling. Use 'kubectl exec -it <pod> -- /bin/sh' to debug running containers."
+  },
+  {
+    "id": "doc010",
+    "title": "Firewall and Network Security Troubleshooting",
+    "content": "Firewall misconfigurations block legitimate traffic and create security gaps. On Linux, list iptables rules with 'iptables -L -n -v'. For UFW: 'ufw status verbose'. Windows Firewall: 'netsh advfirewall firewall show rule name=all'. Test port connectivity with 'telnet host port', 'nc -zv host port', or 'Test-NetConnection -ComputerName host -Port port'. Packet captures with Wireshark or 'tcpdump -i eth0 port 80' reveal dropped packets. Check firewall logs for DENY entries. Network security groups in cloud environments (AWS Security Groups, Azure NSG) require outbound as well as inbound rules. Stateful firewalls track connections - ensure related/established traffic is allowed. Application layer firewalls (WAF) may block based on content patterns. Trace routing issues with 'traceroute' or 'mtr' to identify where packets are dropped."
+  }
+]
