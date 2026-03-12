@@ -19,10 +19,8 @@ venv/
 .env.*
 
 # GraphRAG generated output
-output/
 cache/
 logs/
-input/
 
 # Jupyter
 .ipynb_checkpoints/

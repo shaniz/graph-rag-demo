@@ -1,0 +1,3 @@
+Frontend Performance Issues (Child of Root)
+
+Frontend performance problems originate in the browser. Parent node: Web Application Performance Troubleshooting. Child nodes: frontend-js (JavaScript execution) and frontend-assets (network asset delivery). Measure with Lighthouse or WebPageTest. Key metrics: First Contentful Paint (FCP), Largest Contentful Paint (LCP), Total Blocking Time (TBT). A high TBT points to JavaScript blocking the main thread — see frontend-js. A high LCP with low TBT points to slow asset delivery — see frontend-assets. Check the browser console for JavaScript errors before proceeding.

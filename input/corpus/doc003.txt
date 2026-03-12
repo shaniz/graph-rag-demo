@@ -1,0 +1,3 @@
+Email Delivery Failures and SMTP Troubleshooting
+
+Email delivery failures can occur at multiple points in the mail chain. Start by checking the mail queue on the sending server using 'mailq' (Postfix) or 'Get-Message' in Exchange. NDR (Non-Delivery Reports) contain error codes: 5.1.1 means the recipient address does not exist, 5.7.1 indicates the sender is not authorized. Verify MX records with 'nslookup -type=MX domain.com'. Test SMTP connectivity with 'telnet mail.server.com 25'. Check SPF, DKIM, and DMARC records to prevent spam filtering. Review mail server logs - Postfix logs to /var/log/mail.log. For Exchange, use the Message Trace tool in the admin center. Blacklist issues can be checked at MXToolbox. TLS handshake failures require certificate verification.

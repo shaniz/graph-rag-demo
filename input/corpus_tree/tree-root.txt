@@ -1,0 +1,3 @@
+Web Application Performance Troubleshooting (Root)
+
+A web application experiencing performance problems can fail at three top-level layers: Frontend (browser-side rendering and scripting), Backend (server-side processing and APIs), or Infrastructure (compute, network, and storage). Start diagnosis by measuring end-to-end response time. Use browser DevTools Network tab to split time between Time To First Byte (TTFB) and content download. If TTFB is high (>500ms), the problem is Backend or Infrastructure. If TTFB is low but page load is slow, the problem is Frontend. This root node branches into three child investigations: frontend-issues, backend-issues, and infrastructure-issues.

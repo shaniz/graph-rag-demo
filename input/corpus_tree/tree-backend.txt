@@ -1,0 +1,3 @@
+Backend Performance Issues (Child of Root)
+
+Backend performance problems occur in the application server. Parent node: Web Application Performance Troubleshooting. Child nodes: backend-api (slow API endpoints) and backend-db (database bottlenecks). High TTFB (>200ms) points here. Start by profiling individual API endpoints: log request duration for each route. Use Application Performance Monitoring (APM) tools like Datadog, New Relic, or open-source Jaeger for distributed tracing. If most time is spent in database calls, proceed to backend-db. If time is in computation or external API calls, proceed to backend-api.

@@ -1,0 +1,3 @@
+Infrastructure Performance Issues (Child of Root)
+
+Infrastructure bottlenecks affect all applications running on the host. Parent node: Web Application Performance Troubleshooting. Child nodes: infra-cpu (CPU saturation), infra-network (network latency and throughput), and infra-storage (disk I/O). Check system-level metrics first: CPU utilization with 'top' or 'htop', network with 'iftop' or 'nethogs', disk with 'iostat -x 1'. If CPU is above 80% sustained, go to infra-cpu. If network shows high latency or packet loss, go to infra-network. If disk await is above 20ms, go to infra-storage.
